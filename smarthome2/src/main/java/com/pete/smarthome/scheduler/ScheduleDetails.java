@@ -2,7 +2,7 @@ package com.pete.smarthome.scheduler;
 
 import java.util.Calendar;
 
-public class ScheduleDetails {
+public class ScheduleDetails implements Cloneable {
 
 	private String device = "";
 	private boolean randomOn = false;
@@ -12,6 +12,7 @@ public class ScheduleDetails {
 	private boolean nextDay = false;
 	private String onCode = "";
 	private String offCode ="";
+	private boolean notificationEnabled;
 	
 
 	/**
@@ -85,12 +86,15 @@ public class ScheduleDetails {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("ScheduleDetails [device=");
+		builder.append("ScheduleDetails [");
+		builder.append("device=");
 		builder.append(device);
 		builder.append(", randomOn=");
 		builder.append(randomOn);
 		builder.append(", randomOff=");
 		builder.append(randomOff);
+		builder.append(", Configured Time Off=");
+		builder.append(timeOff);
 		builder.append(", dateOn=");
 		if (dateOn != null) {
 			builder.append(dateOn.getTime().toString());
@@ -109,6 +113,8 @@ public class ScheduleDetails {
 		builder.append(onCode);
 		builder.append(", OffCode=");
 		builder.append(offCode);
+		builder.append(", NotificationEnabled=");
+		builder.append(notificationEnabled);
 		builder.append("]");
 		return builder.toString();
 	}
@@ -151,6 +157,34 @@ public class ScheduleDetails {
 	 */
 	public void setOffCode(String offCode) {
 		this.offCode = offCode;
+	}
+
+	public void setNotificationEnabled(boolean NotificationEnabled) {
+		this.notificationEnabled = NotificationEnabled;		
+	}
+
+	/**
+	 * @return the notificationEnabled
+	 */
+	public boolean isNotificationEnabled() {
+		return notificationEnabled;
+	}
+	private String timeOff = "23:59";
+	public void setTimeOff(String timeOff) {
+		this.timeOff = timeOff;		
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public String getTimeOff()
+	{
+		return timeOff;
+	}
+	
+	public Object clone() throws CloneNotSupportedException {
+	    return super.clone();
 	}
 
 }

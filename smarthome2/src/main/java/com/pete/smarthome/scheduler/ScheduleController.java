@@ -2,6 +2,7 @@ package com.pete.smarthome.scheduler;
 
 import static org.quartz.TriggerBuilder.newTrigger;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
@@ -53,6 +54,9 @@ public class ScheduleController {
 		CreateGarden(cal);
 		CreateXMASLights(cal);
 		CreateGarageLights(cal);
+		//scheduleOn("garden");
+		//scheduleOn("xmas");
+		//scheduleOn("garage");
 	}
 
 	private Calendar getSunSetTime(boolean tommorow) {
@@ -71,10 +75,12 @@ public class ScheduleController {
 	private void CreateGarden(Calendar cal) {
 		ScheduleDetails sched = new ScheduleDetails();
 		sched.setDevice("garden");
+		sched.setTimeOff("23:59:00");
 		sched.setDateOn(cal);
 		sched.setNextDay(false);
 		sched.setOnCode("1381717");
 		sched.setOffCode("1381716");
+		sched.setNotificationEnabled(true);
 		scheduleOn(sched);
 	}
 
@@ -82,11 +88,13 @@ public class ScheduleController {
 		ScheduleDetails sched = new ScheduleDetails();
 		sched.setDevice("xmas");
 		sched.setDateOn(cal);
+		sched.setTimeOff("00:05:00");
 		sched.setNextDay(false);
 		sched.setOnCode("15028159");
 		sched.setOffCode("15028151");
 		sched.setRandomOn(true);
-		sched.setRandomOff(true);		
+		sched.setRandomOff(true);	
+		sched.setNotificationEnabled(false);
 		scheduleOn(sched);
 	}
 	
@@ -94,11 +102,13 @@ public class ScheduleController {
 		ScheduleDetails sched = new ScheduleDetails();
 		sched.setDevice("garage");
 		sched.setDateOn(cal);
+		sched.setTimeOff("22:45:00");
 		sched.setNextDay(false);
 		sched.setOnCode("1397845");
 		sched.setOffCode("1397844");
 		sched.setRandomOn(true);
-		sched.setRandomOff(true);		
+		sched.setRandomOff(true);
+		sched.setNotificationEnabled(false);
 		scheduleOn(sched);
 	}
 
@@ -124,7 +134,6 @@ public class ScheduleController {
 	 */
 	public void scheduleOn(ScheduleDetails details) {
 		try
-
 		{
 			int offset = 0;
 			String group = "GroupOn";
@@ -145,13 +154,10 @@ public class ScheduleController {
 			String name = date.getTime().toString() + " " + details.getDevice() + " ON";
 			JobDetail job = JobBuilder.newJob(TurnLightOn.class).withIdentity(name, group).build();
 			Map dataMap = job.getJobDataMap();
-			dataMap.put("details", details);
+			ScheduleDetails d = (ScheduleDetails) details.clone();
+			dataMap.put("details", d);
 			dataMap.put("task", "ON");
-			SimpleTrigger trigger = (SimpleTrigger) newTrigger().withIdentity(name, group).startAt(date.getTime()) // some
-																													// Date
-					.forJob(name, group) // identify job with name, group
-											// strings
-					.build();
+			SimpleTrigger trigger = (SimpleTrigger) newTrigger().withIdentity(name, group).startAt(date.getTime()).forJob(name, group).build();
 
 			scheduler.scheduleJob(job, trigger);
 			log.info("Scheduled Lights On: " + details.toString());
@@ -159,8 +165,8 @@ public class ScheduleController {
 		} catch (Exception e) {
 			log.error("Error Creating Schedule", e);
 		}
-
 	}
+	
 
 	/***
 	 * Create Schedule to turn off the lights
@@ -175,7 +181,23 @@ public class ScheduleController {
 		int year = date.get(Calendar.YEAR);
 		int month = date.get(Calendar.MONTH);
 		int day = date.get(Calendar.DAY_OF_MONTH);
-		off.set(year, month, day, 23, 59, 00);
+		
+		
+		SimpleDateFormat sdf = new SimpleDateFormat("hh:mm:ss");
+	    Date dTime = null;
+	    try {
+	        dTime = sdf.parse(details.getTimeOff());
+	    } catch (Exception e) {
+	        log.error("Error getting Off Time", e);
+	    }
+
+	    off.set(year, month, day, sdf.getCalendar().get(Calendar.HOUR_OF_DAY), sdf.getCalendar().get(Calendar.MINUTE), sdf.getCalendar().get(Calendar.SECOND));
+	    
+	    if(off.before(details.getDateOn()))
+		{
+	    	log.debug("Date Off is before Date On: " + details);
+	    	off.roll(Calendar.DATE, true);
+		}
 
 		if (details.isRandomOff()) {
 			offset = getRandomNumber();
@@ -190,13 +212,10 @@ public class ScheduleController {
 			String name = off.getTime().toString() + " " + details.getDevice() + " OFF";
 			JobDetail job = JobBuilder.newJob(TurnLightOff.class).withIdentity(name, group).build();
 			Map dataMap = job.getJobDataMap();
-			dataMap.put("details", details);
+			ScheduleDetails d = (ScheduleDetails) details.clone();
+			dataMap.put("details", d);
 			dataMap.put("task", "OFF");
-			SimpleTrigger trigger = (SimpleTrigger) newTrigger().withIdentity(name, group).startAt(off.getTime()) // some
-																													// Date
-					.forJob(name, group) // identify job with name, group
-											// strings
-					.build();
+			SimpleTrigger trigger = (SimpleTrigger) newTrigger().withIdentity(name, group).startAt(off.getTime()).forJob(name, group).build();
 			scheduler.scheduleJob(job, trigger);
 			log.info("Scheduled Lights Off: " + details.toString());
 		} catch (Exception e) {

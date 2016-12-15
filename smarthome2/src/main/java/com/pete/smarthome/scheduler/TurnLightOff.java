@@ -1,6 +1,5 @@
 package com.pete.smarthome.scheduler;
 
-
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
@@ -13,21 +12,20 @@ import com.pete.smarthome.lights.LightController;
 
 public class TurnLightOff implements Job {
 	Logger log = LoggerFactory.getLogger(this.getClass());
+
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		log.debug("Turn Off Lights");
-		
+
 		JobDataMap map = context.getJobDetail().getJobDataMap();
-		if(map.containsKey("details"))
-		{
-			ScheduleDetails device = (ScheduleDetails)map.get("details");
-			log.debug("Turn lights Off: "+ device);
-			SmartPhone sp = new SmartPhone();
-			sp.SendNotificationProwl("Lights OFF. " + device);
-			LightController.getInstance().SendCommand(device.getOffCode());
+		if (map.containsKey("details")) {
+			ScheduleDetails details = (ScheduleDetails) map.get("details");
+			log.debug("Turn lights Off: " + details);
+			if (details.isNotificationEnabled()) {
+				SmartPhone sp = new SmartPhone();
+				sp.SendNotificationProwl("Lights OFF. " + details);
+			}
+			LightController.getInstance().SendCommand(details.getOffCode());
 		}
-		
-		//LightController.getInstance().LightsOff("garden");
-		
 	}
 
 }
