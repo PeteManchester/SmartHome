@@ -1,0 +1,29 @@
+[  
+	{  
+      "device":"garden",
+      "randomOn":true,
+      "randomOff":true,
+      "onCode":"1381717",
+      "offCode":"1381716",
+      "notificationEnabled":true,
+      "timeOff":"23:59:59"
+   },
+   {  
+      "device":"xmas",
+      "randomOn":true,
+      "randomOff":true,
+      "onCode":"15028159",
+      "offCode":"15028151",
+      "notificationEnabled":false,
+      "timeOff":"00:05:00"
+   },
+   {  
+      "device":"garage",
+      "randomOn":true,
+      "randomOff":true,
+      "onCode":"1397845",
+      "offCode":"1397844",
+      "notificationEnabled":false,
+      "timeOff":"23:50:00"
+   }
+]

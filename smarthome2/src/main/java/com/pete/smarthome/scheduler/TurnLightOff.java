@@ -18,7 +18,7 @@ public class TurnLightOff implements Job {
 
 		JobDataMap map = context.getJobDetail().getJobDataMap();
 		if (map.containsKey("details")) {
-			ScheduleDetails details = (ScheduleDetails) map.get("details");
+			ScheduleDetail details = (ScheduleDetail) map.get("details");
 			log.debug("Turn lights Off: " + details);
 			if (details.isNotificationEnabled()) {
 				SmartPhone sp = new SmartPhone();

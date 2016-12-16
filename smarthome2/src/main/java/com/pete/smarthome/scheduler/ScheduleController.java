@@ -2,9 +2,12 @@ package com.pete.smarthome.scheduler;
 
 import static org.quartz.TriggerBuilder.newTrigger;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -21,6 +24,7 @@ import org.quartz.impl.matchers.GroupMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pete.smarthome.lights.LightController;
 
 public class ScheduleController {
@@ -51,12 +55,22 @@ public class ScheduleController {
 	public void SetSunSet(boolean tommorow) {
 		Calendar cal = Calendar.getInstance();
 		cal = getSunSetTime(tommorow);
-		CreateGarden(cal);
-		CreateXMASLights(cal);
-		CreateGarageLights(cal);
-		//scheduleOn("garden");
-		//scheduleOn("xmas");
-		//scheduleOn("garage");
+		//CreateGarden(cal);
+		//CreateXMASLights(cal);
+		//CreateGarageLights(cal);		
+		List<ScheduleDetail> schedules;// = new List<ScheduleDetail>();
+
+		ObjectMapper mapper = new ObjectMapper(); // can reuse, share globally
+		try {
+			schedules = Arrays.asList(mapper.readValue(new File("devices.json"), ScheduleDetail[].class));
+			for(ScheduleDetail details: schedules)
+			{
+				details.setDateOn(cal);
+				scheduleOn(details);
+			}
+		} catch (Exception e) {
+			log.error("Error Reading devices.json", e);
+		}
 	}
 
 	private Calendar getSunSetTime(boolean tommorow) {
@@ -72,8 +86,12 @@ public class ScheduleController {
 		return cal;
 	}
 
+	/**
+	 * OLD method now use the devices.json
+	 * @param cal
+	 */
 	private void CreateGarden(Calendar cal) {
-		ScheduleDetails sched = new ScheduleDetails();
+		ScheduleDetail sched = new ScheduleDetail();
 		sched.setDevice("garden");
 		sched.setTimeOff("23:59:00");
 		sched.setDateOn(cal);
@@ -84,8 +102,12 @@ public class ScheduleController {
 		scheduleOn(sched);
 	}
 
+	/**
+	 * OLD method now use the devices.json
+	 * @param cal
+	 */
 	private void CreateXMASLights(Calendar cal) {
-		ScheduleDetails sched = new ScheduleDetails();
+		ScheduleDetail sched = new ScheduleDetail();
 		sched.setDevice("xmas");
 		sched.setDateOn(cal);
 		sched.setTimeOff("00:05:00");
@@ -93,13 +115,17 @@ public class ScheduleController {
 		sched.setOnCode("15028159");
 		sched.setOffCode("15028151");
 		sched.setRandomOn(true);
-		sched.setRandomOff(true);	
+		sched.setRandomOff(true);
 		sched.setNotificationEnabled(false);
 		scheduleOn(sched);
 	}
-	
+
+	/**
+	 * OLD method now use the devices.json
+	 * @param cal
+	 */
 	private void CreateGarageLights(Calendar cal) {
-		ScheduleDetails sched = new ScheduleDetails();
+		ScheduleDetail sched = new ScheduleDetail();
 		sched.setDevice("garage");
 		sched.setDateOn(cal);
 		sched.setTimeOff("22:45:00");
@@ -132,9 +158,8 @@ public class ScheduleController {
 	 * 
 	 * @param device
 	 */
-	public void scheduleOn(ScheduleDetails details) {
-		try
-		{
+	public void scheduleOn(ScheduleDetail details) {
+		try {
 			int offset = 0;
 			String group = "GroupOn";
 			Calendar date = details.getDateOn();
@@ -154,7 +179,7 @@ public class ScheduleController {
 			String name = date.getTime().toString() + " " + details.getDevice() + " ON";
 			JobDetail job = JobBuilder.newJob(TurnLightOn.class).withIdentity(name, group).build();
 			Map dataMap = job.getJobDataMap();
-			ScheduleDetails d = (ScheduleDetails) details.clone();
+			ScheduleDetail d = (ScheduleDetail) details.clone();
 			dataMap.put("details", d);
 			dataMap.put("task", "ON");
 			SimpleTrigger trigger = (SimpleTrigger) newTrigger().withIdentity(name, group).startAt(date.getTime()).forJob(name, group).build();
@@ -166,14 +191,13 @@ public class ScheduleController {
 			log.error("Error Creating Schedule", e);
 		}
 	}
-	
 
 	/***
 	 * Create Schedule to turn off the lights
 	 * 
 	 * @param device
 	 */
-	public void scheduleOff(ScheduleDetails details) {
+	public void scheduleOff(ScheduleDetail details) {
 		String group = "GroupOff";
 		int offset = 0;
 		Calendar off = Calendar.getInstance();
@@ -181,22 +205,20 @@ public class ScheduleController {
 		int year = date.get(Calendar.YEAR);
 		int month = date.get(Calendar.MONTH);
 		int day = date.get(Calendar.DAY_OF_MONTH);
-		
-		
-		SimpleDateFormat sdf = new SimpleDateFormat("hh:mm:ss");
-	    Date dTime = null;
-	    try {
-	        dTime = sdf.parse(details.getTimeOff());
-	    } catch (Exception e) {
-	        log.error("Error getting Off Time", e);
-	    }
 
-	    off.set(year, month, day, sdf.getCalendar().get(Calendar.HOUR_OF_DAY), sdf.getCalendar().get(Calendar.MINUTE), sdf.getCalendar().get(Calendar.SECOND));
-	    
-	    if(off.before(details.getDateOn()))
-		{
-	    	log.debug("Date Off is before Date On: " + details);
-	    	off.roll(Calendar.DATE, true);
+		SimpleDateFormat sdf = new SimpleDateFormat("hh:mm:ss");
+		Date dTime = null;
+		try {
+			dTime = sdf.parse(details.getTimeOff());
+		} catch (Exception e) {
+			log.error("Error getting Off Time", e);
+		}
+
+		off.set(year, month, day, sdf.getCalendar().get(Calendar.HOUR_OF_DAY), sdf.getCalendar().get(Calendar.MINUTE), sdf.getCalendar().get(Calendar.SECOND));
+
+		if (off.before(details.getDateOn())) {
+			log.debug("Date Off is before Date On: " + details);
+			off.roll(Calendar.DATE, true);
 		}
 
 		if (details.isRandomOff()) {
@@ -212,7 +234,7 @@ public class ScheduleController {
 			String name = off.getTime().toString() + " " + details.getDevice() + " OFF";
 			JobDetail job = JobBuilder.newJob(TurnLightOff.class).withIdentity(name, group).build();
 			Map dataMap = job.getJobDataMap();
-			ScheduleDetails d = (ScheduleDetails) details.clone();
+			ScheduleDetail d = (ScheduleDetail) details.clone();
 			dataMap.put("details", d);
 			dataMap.put("task", "OFF");
 			SimpleTrigger trigger = (SimpleTrigger) newTrigger().withIdentity(name, group).startAt(off.getTime()).forJob(name, group).build();
@@ -239,7 +261,7 @@ public class ScheduleController {
 					// log.debug("Trigger Time: " +
 					// trigger.getNextFireTime().toString());
 					JobDetail jb = scheduler.getJobDetail(jobKey);
-					ScheduleDetails details = (ScheduleDetails) jb.getJobDataMap().get("details");
+					ScheduleDetail details = (ScheduleDetail) jb.getJobDataMap().get("details");
 					String task = jb.getJobDataMap().getString("task");
 					// log.debug("JobDetail: " + device + " " + task);
 					String sDetails = "JobName: " + jobKey.getName() + " GroupName: " + jobKey.getGroup() + details.toString() + " ScheduleTime: " + trigger.getNextFireTime().toString();
