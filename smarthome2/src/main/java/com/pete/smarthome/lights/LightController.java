@@ -58,6 +58,9 @@ public class LightController {
 			} else if(value.equalsIgnoreCase("GARAGE"))
 			{
 				command = "1397845";
+			} else if(value.equalsIgnoreCase("LOUNGE"))
+			{
+				command = "4527445";
 			}
 		} else {
 			if (value.equalsIgnoreCase("GARDEN")) {
@@ -69,6 +72,10 @@ public class LightController {
 			} else if (value.equalsIgnoreCase("GARAGE"))
 			{
 				command = "1397844";
+			}
+			else if(value.equalsIgnoreCase("LOUNGE"))
+			{
+				command = "4527444";
 			}
 		}
 		SendCommand(command);

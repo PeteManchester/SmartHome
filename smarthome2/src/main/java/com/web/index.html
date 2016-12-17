@@ -98,6 +98,26 @@
 			});
 		});
 		
+		$("#LOUNGEOn").click(function() {
+			$.ajax({
+				url : '/pete/lightcontroller/on?value=lounge',
+				type : 'get',
+				success : function(data) {
+					//alert(data);
+				}
+			});
+		});
+
+		$("#LOUNGEOff").click(function() {
+			$.ajax({
+				url : '/pete/lightcontroller/off?value=lounge',
+				type : 'get',
+				success : function(data) {
+					//alert(data);
+				}
+			});
+		});
+		
 		$("#GetSchedule").click(function() {
 			$.ajax({
 				url : '/pete/lightcontroller/getSchedule',
@@ -159,7 +179,7 @@
 					<label>XMAS Lights</label>
 				</td>
 				<td>
-					<label class="ui-label">(1-4)</label>
+					<label class="ui-label">(x-x)</label>
 				</td>
 				<td>
 					<button class="ui-btn ui-btn-b" id="XMASOn">On</button>
@@ -181,6 +201,21 @@
 				</td>
 				<td>
 					<button class="ui-btn ui-btn-b" id="GARAGEOff">Off</button>
+				</td>
+		</tr>
+		</tr>
+		            <tr>
+             	<td>
+					<label>Lounge Lights</label>
+				</td>
+				<td>
+					<label class="ui-label">(2-1)</label>
+				</td>
+				<td>
+					<button class="ui-btn ui-btn-b" id="LOUNGEOn">On</button>
+				</td>
+				<td>
+					<button class="ui-btn ui-btn-b" id="LOUNGEOff">Off</button>
 				</td>
 		</tr>
 		<tr>

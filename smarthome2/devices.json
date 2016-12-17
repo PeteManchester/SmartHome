@@ -1,8 +1,8 @@
 [  
 	{  
       "device":"garden",
-      "randomOn":true,
-      "randomOff":true,
+      "randomOn":false,
+      "randomOff":false,
       "onCode":"1381717",
       "offCode":"1381716",
       "notificationEnabled":true,
@@ -24,6 +24,15 @@
       "onCode":"1397845",
       "offCode":"1397844",
       "notificationEnabled":false,
+      "timeOff":"23:50:00"
+   },
+   {  
+      "device":"lounge",
+      "randomOn":true,
+      "randomOff":true,
+      "onCode":"4527445",
+      "offCode":"4527444",
+      "notificationEnabled":true,
       "timeOff":"23:50:00"
    }
 ]
