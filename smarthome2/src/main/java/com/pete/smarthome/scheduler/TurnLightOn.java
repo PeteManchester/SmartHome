@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.pete.smarthome.comms.SmartPhone;
+import com.pete.smarthome.config.Device;
 import com.pete.smarthome.lights.LightController;
 
 public class TurnLightOn implements Job {
@@ -19,7 +20,7 @@ public class TurnLightOn implements Job {
 
 		JobDataMap map = context.getJobDetail().getJobDataMap();
 		if (map.containsKey("details")) {
-			ScheduleDetail details = (ScheduleDetail) map.get("details");
+			Device details = (Device) map.get("details");
 			log.debug("Turn lights On: " + details);
 			if (details.isNotificationEnabled()) {
 				SmartPhone sp = new SmartPhone();

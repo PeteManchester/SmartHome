@@ -1,8 +1,12 @@
+{
+	"latitude": 53.5828508,
+	"longitude":-2.1177322999999433,
+	"devices":
 [  
 	{  
       "device":"garden",
-      "randomOn":false,
-      "randomOff":false,
+      "randomOn":"0:0",
+      "randomOff":"0:0",
       "onCode":"1381717",
       "offCode":"1381716",
       "notificationEnabled":true,
@@ -10,8 +14,8 @@
    },
    {  
       "device":"xmas",
-      "randomOn":true,
-      "randomOff":true,
+      "randomOn":"-300:0",
+      "randomOff":"-0:300",
       "onCode":"15028159",
       "offCode":"15028151",
       "notificationEnabled":false,
@@ -19,8 +23,8 @@
    },
    {  
       "device":"garage",
-      "randomOn":true,
-      "randomOff":true,
+      "randomOn":"-300:300",
+      "randomOff":"-300:300",
       "onCode":"1397845",
       "offCode":"1397844",
       "notificationEnabled":false,
@@ -28,11 +32,12 @@
    },
    {  
       "device":"lounge",
-      "randomOn":true,
-      "randomOff":true,
+      "randomOn":"-300:300",
+      "randomOff":"-300:300",
       "onCode":"4527445",
       "offCode":"4527444",
       "notificationEnabled":true,
       "timeOff":"23:50:00"
    }
 ]
+}
